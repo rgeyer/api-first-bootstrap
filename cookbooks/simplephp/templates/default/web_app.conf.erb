@@ -1,0 +1,25 @@
+<VirtualHost *:80>
+        ServerAdmin root@localhost
+
+        DocumentRoot <%= @params[:docroot] %>
+        EnableSendfile off
+        <Directory />
+                Options FollowSymLinks
+                AllowOverride None
+        </Directory>
+        <Directory <%= @params[:docroot] %>>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                allow from all
+        </Directory>
+
+        ErrorLog /var/log/httpd/error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        CustomLog /var/log/httpd/access.log combined
+        ServerSignature On
+</VirtualHost>
