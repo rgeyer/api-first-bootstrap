@@ -13,6 +13,17 @@ UI.
 Examples
 ========
 
+Run an examples server
+
+```
+./start-examples.sh
+```
+
+Then go to http://localhost:8080/examples/<examplename>.php
+
+Where example names are;
+* simple
+
 Delete from a link
 ------------------
 ```
