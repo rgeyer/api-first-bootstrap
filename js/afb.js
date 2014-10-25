@@ -6,6 +6,7 @@
   var Afb = function(element,options) {
     this.$el = $(element).on('click', $.proxy(this.send_request, this));
     this.settings = $.extend({},this.DEFAULTS,options);
+    this.settings.href = $(element).attr('href');
     this.progressModal = null;
   }
 
@@ -17,6 +18,13 @@
       dataType: afb.settings.datatype,
       complete: function(jqXHR, status) {
         afb.stopProgress();
+        if(afb.settings.redirect && typeof afb.settings.redirect == 'string' ) {
+          if(afb.settings.redirect.toLowerCase() == 'self') {
+            location.reload();
+          } else {
+            window.location.href = afb.settings.redirect;
+          }
+        }
       }
     }, afb.settings.ajaxOptions, {});
     $.ajax(ajaxOptions);
@@ -28,6 +36,7 @@
     form: false,
     progress: true,
     dataType: 'json',
+    redirect: false,
     doAjax: Afb.doAjax,
     ajaxOptions: {}
   };
@@ -138,7 +147,6 @@
     return this.each(function() {
       var $this = $(this);
       var data = $this.data('afb');
-      console.log(data);
       var options = $.extend({}, Afb.DEFAULTS, $this.data(), typeof option == 'object' && option);
 
       if(!data) $this.data('afb', (data = new Afb(this, options)))
@@ -156,7 +164,7 @@
   }
 
   $(window).on('load', function() {
-    $('button.afbaction').each(function() {
+    $('.afbaction').each(function() {
       $(this).afb();
     })
   });
