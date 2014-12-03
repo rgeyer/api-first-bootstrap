@@ -10,9 +10,25 @@
     this.progressModal = null;
   }
 
+  Afb.prototype.options = function(settings) {
+    this.settings = $.extend({}, this.settings, settings);
+  }
+
   Afb.doAjax = function(afb,data) {
+    var tokensRegex = new RegExp(afb.settings.urlTokens.ldelim+'.*?'+afb.settings.urlTokens.rdelim,'g');
+    var urlTokens = afb.settings.href.match(tokensRegex);
+    var url = afb.settings.href;
+    if (urlTokens) {
+      var i = 0;
+      for (i=0; i < urlTokens.length; ++i) {
+        var nodelims = urlTokens[i].replace(afb.settings.urlTokens.ldelim,'').replace(afb.settings.urlTokens.rdelim,'');
+        url = url.replace(urlTokens[i],data[nodelims]);
+        delete data[nodelims];
+      }
+    }
+
     var ajaxOptions = $.extend({
-      url:afb.settings.href,
+      url:url,
       type:afb.settings.method,
       data:data,
       dataType: afb.settings.datatype,
@@ -33,12 +49,18 @@
   Afb.prototype.DEFAULTS = {
     method: 'GET',
     confirm: false,
-    form: false,
     progress: true,
     dataType: 'json',
     redirect: false,
     doAjax: Afb.doAjax,
-    ajaxOptions: {}
+    ajaxOptions: {},
+    json: false,
+    form: false,
+    func: false,
+    urlTokens: {
+      ldelim: "{{",
+      rdelim: "}}"
+    }
   };
 
   Afb.prototype.startProgress = function() {
@@ -83,9 +105,21 @@
     evt.stopPropagation();
 
     var data = {};
-    if (afb.settings.form) {
+    if (afb.settings.form !== false) {
       var form = $(afb.settings.form);
       data = convertFormToKeyValuePairJson(form);
+    }
+
+    if (afb.settings.json !== false) {
+      data = afb.settings.json;
+    }
+
+    if (afb.settings.func !== false) {
+      if (typeof afb.settings.func == 'function') {
+        data = afb.settings.func();
+      } else {
+        data = window[afb.settings.func]();
+      }
     }
 
     if (afb.settings.confirm) {
